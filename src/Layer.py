@@ -5,9 +5,9 @@ class Layer:
         self.output = None
 
     # computes the output Y of a layer for a given input X
-    def FORWARD(self, input):
+    def forward(self, input):
         raise NotImplementedError
 
     # computes dE/dX for a given dE/dY (and update parameters if any)
-    def BACKWORD(self, output_error, learning_rate):
+    def backward(self, input, output, learning_rate):
         raise NotImplementedError
