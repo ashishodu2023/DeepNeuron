@@ -1,47 +1,58 @@
-import os
-import urllib.request
-
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 
 
 class DataProcessing:
-    def GetDigitData(self):
-        url = "http://archive.ics.uci.edu/ml/machine-learning-databases/optdigits/optdigits.tra"
-        file_path = "optdigits.tra"
 
-        # Download the dataset
-        if not os.path.exists(file_path):
-            print("Downloading Optdigits dataset...")
-            urllib.request.urlretrieve(url, file_path)
-            print("Download complete.")
+    def DataProcessing(self):
+        # File path containing the binary representations and labels
+        file_path = "../file.txt"
 
-    # Function to preprocess the data and save it into input and target files
-    def PreProcessSaveData(self):
-        # Load the dataset
-        data = np.loadtxt("C:\\Users\\Ashish\\PycharmProjects\\DeepNeuron\\optdigits.tra", delimiter=',')
-        X = data[:, :-1]
-        y = data[:, -1]
+        # Read data from the file
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
 
-        # Split the data into training and testing sets
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        # Process the data
+        data = []
+        current_sequence = ""
+        current_label = None
 
-        # Standardize the features
-        scaler = StandardScaler()
-        X_train = scaler.fit_transform(X_train)
-        X_test = scaler.transform(X_test)
+        for line in lines:
+            line = line.strip()
+            if line:
+                if len(line) == 1:
+                    # If the line starts with a digit, treat it as a label
+                    if current_label is not None:
+                        data.append((current_sequence, current_label))
+                    current_label = int(line)
+                    current_sequence = ""
+                else:
+                    # If the line is not a label, append it to the current sequence
+                    current_sequence += line
 
-        # Save the preprocessed data into input and target files
-        np.save("../train/X_train.npy", X_train)
-        np.save("../train/y_train.npy", y_train)
-        np.save("../test/X_test.npy", X_test)
-        np.save("../test/y_test.npy", y_test)
-        print('Files saved to train and test folder')
+        # Add the last data point
+        if current_label is not None and current_sequence:
+            data.append((current_sequence, current_label))
 
+        # Convert binary sequences to NumPy arrays
+        X = []
+        y = []
 
+        for binary_sequence, label in data:
+            # Assuming each line of the binary sequence represents a row in the matrix
+            matrix = np.array([list(map(int, line)) for line in binary_sequence.split('\n') if line])
+            flattened_image = matrix.flatten()
+            X.append(flattened_image)
+            y.append(label)
 
-if __name__=='__main__':
-    dp = DataProcessing()
-    dp.GetDigitData()
-    dp.PreProcessSaveData()
+        # Convert lists to NumPy arrays
+        X = np.array(X)
+        y = np.array(y)
+
+        # Check if there are enough samples for splitting
+        if len(X) > 0:
+            # Split the data into training and test sets
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+            return X_train, X_test, y_train, y_test
+        else:
+            print("Not enough samples for splitting.")

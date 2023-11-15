@@ -45,6 +45,7 @@ class Network:
                     output = layer.forward_propagation(output)
 
                 # compute loss (for display purpose only)
+                #print(y_train[j])
                 loss += self.loss(y_train[j], output)
                 #print(err)
                 # backward propagation

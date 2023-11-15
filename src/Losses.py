@@ -4,7 +4,7 @@ from src.Activations import softmax
 
 def cross_entropy(y_pred, y_true):
     y_pred = softmax(y_pred)
-    loss = -np.sum(y_true * np.log(y_pred + 1e-15))  # Added epsilon for numerical stability
+    loss = -np.sum(y_true * np.log(y_pred))  # Added epsilon for numerical stability
     return loss
 
 
